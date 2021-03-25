@@ -5,7 +5,7 @@ import MovieList from './components/MovieList';
 import Movie from './components/Movie';
 
 import MovieHeader from './components/MovieHeader';
-
+import AddMovieForm from './components/AddMovieForm';
 import EditMovieForm from './components/EditMovieForm';
 import FavoriteMovieList from './components/FavoriteMovieList';
 
@@ -15,7 +15,7 @@ const App = (props) => {
   const [movies, setMovies] = useState([]);
   const [favoriteMovies, setFavoriteMovies] = useState([]);
 
-  useEffect(()=>{
+  useEffect(() => {
     axios.get('http://localhost:5000/api/movies')
       .then(res => {
         setMovies(res.data);
@@ -25,39 +25,61 @@ const App = (props) => {
       });
   }, []);
 
-  const deleteMovie = (id)=> {
-    setMovies(movies.filter(m=>(m.id !== id)));
-  }
+  const deleteMovie = (id) => {
+    axios
+      .delete(`http://localhost:5000/api/movies/${id}`)
+      .then(res => {
+        console.log(res.data)
+        setMovies(movies.filter(m => (m.id !== id)));
+      })
 
+
+  }
+  const getMovies = () => {
+    axios.get('http://localhost:5000/api/movies')
+      .then(res => {
+        setMovies(res.data);
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
+  useEffect(() => {
+    getMovies()
+  }, []);
   const addToFavorites = (movie) => {
-    
+
   }
 
   return (
     <div>
       <nav className="navbar navbar-dark bg-dark">
-        <span className="navbar-brand" ><img width="40px" alt="" src="./Lambda-Logo-Red.png"/> HTTP / CRUD Module Project</span>
+        <span className="navbar-brand" ><img width="40px" alt="" src="./Lambda-Logo-Red.png" /> HTTP / CRUD Module Project</span>
       </nav>
 
       <div className="container">
-        <MovieHeader/>
+        <MovieHeader />
         <div className="row ">
-          <FavoriteMovieList favoriteMovies={favoriteMovies}/>
-        
+          <FavoriteMovieList favoriteMovies={favoriteMovies} />
+
           <Switch>
-            <Route path="/movies/edit/:id">
-            </Route>
+            <Route path="/movies/edit/:id" render={(props) => {
+              return (<EditMovieForm {...props} setMovies={setMovies} />)
+            }} />
+
 
             <Route path="/movies/:id">
-              <Movie deleteMovie={deleteMovie}/>
+              <Movie deleteMovie={deleteMovie} />
             </Route>
-
+            <Route path="/add">
+              <AddMovieForm setMovies={setMovies} getMovies={getMovies} />
+            </Route>
             <Route path="/movies">
-              <MovieList movies={movies}/>
+              <MovieList movies={movies} />
             </Route>
 
             <Route path="/">
-              <Redirect to="/movies"/>
+              <Redirect to="/movies" />
             </Route>
           </Switch>
         </div>
